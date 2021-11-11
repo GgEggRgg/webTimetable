@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>
+            201701721김민수 학점계산기
+        </title>
+        <script>
+            function start() {
+                var value = localStorage.getItem('localSublist');
+                var subjectInput = document.getElementsByName("subject");
+                var countInput = document.getElementsByName("count");
+
+                var num = 0;
+                if(value!=null){
+                    var storedStorage = JSON.parse(value);
+                    for(var i = 0; i < storedStorage.length; i++){
+                        var temp1 = storedStorage[i].indexOf("|");
+                        var temp2 = storedStorage[i].indexOf("&");
+                        var temp3 = storedStorage[i].indexOf("^");
+                        
+                        var subject = storedStorage[i].substring(0, temp1);
+                        var time = storedStorage[i].substring(temp2+1, temp3);
+                        subjectInput[num].value = subject;
+                        countInput[num].value = time;
+                        num++;
+                    }
+                }
+            }
+            //새 칸 넣기
+            function addInput() {
+                var parent = document.getElementById("Calclist");
+                var br = document.createElement("br");
+
+                var newLabel1 = document.createElement("label");
+                var newInput1 = document.createElement("input");
+                newLabel1.innerHTML = "강의명 ";
+                newLabel1.setAttribute("for", "subject");
+                newInput1.setAttribute("type", "text");
+                newInput1.setAttribute("name", "subject");
+                newInput1.setAttribute("class", "subject");
+
+                var newLabel2 = document.createElement("label");
+                var newInput2 = document.createElement("input");
+                newLabel2.innerHTML = "학점 ";
+                newLabel2.setAttribute("for", "count");
+                newInput2.setAttribute("type", "text");
+                newInput2.setAttribute("name", "count");
+                newInput2.setAttribute("class", "count");
+                
+                var newLabel3 = document.createElement("label");
+                var newInput3 = document.createElement("input");
+                newLabel3.innerHTML = "성적 ";
+                newLabel3.setAttribute("for", "grade");
+                newInput3.setAttribute("type", "text");
+                newInput3.setAttribute("name", "grade");
+                newInput3.setAttribute("class", "grade");
+
+                var newLabel4 = document.createElement("label");
+                var newInput4 = document.createElement("input");
+                newLabel4.innerHTML = "전공 ";
+                newLabel4.setAttribute("for", "check");
+                newInput4.setAttribute("type", "checkbox");
+                newInput4.setAttribute("name", "major");
+                newInput4.setAttribute("class", "major");
+                
+                
+                //자식으로 넣기
+                parent.appendChild(newLabel1);
+                parent.appendChild(newInput1);
+                parent.appendChild(newLabel2);
+                parent.appendChild(newInput2);
+                parent.appendChild(newLabel3);
+                parent.appendChild(newInput3);
+                parent.appendChild(newLabel4);
+                parent.appendChild(newInput4);
+                parent.appendChild(br);
+
+                //줄 맞춤을 위한 빈칸 추가
+                newInput1.outerHTML = newInput1.outerHTML + " ";
+                newInput2.outerHTML = newInput2.outerHTML + " ";
+                newInput3.outerHTML = newInput3.outerHTML + " ";
+                newInput4.outerHTML = newInput4.outerHTML + " ";
+            }
+            //창 종료
+            function Exit() {
+                //계산한 값 저장
+                close();
+            }
+            //평점 계산 함수
+            function doCalc() {
+                var majorFlag = false;
+                var count = document.getElementsByName("count");
+                var grade = document.getElementsByName("grade");
+                var major = document.getElementsByName("major");
+                var point = new Array();
+                var majorResult=0;
+                var result=0;
+                var temp=0;
+                var temp2=0;
+
+                for(var i = 0; i < count.length; i++){
+                    switch(grade[i].value.toUpperCase()){
+                        case "A+":
+                            point[i] = 45;
+                            break;
+                        case "A":
+                            point[i] = 40;
+                            break;
+                        case "A0":
+                            point[i] = 40;
+                            break;
+                        case "B+":
+                            point[i] = 35;
+                            break;
+                        case "B":
+                            point[i] = 30;
+                            break;
+                        case "B0":
+                            point[i] = 30;
+                            break;
+                        case "C+":
+                            point[i] = 25;
+                            break;
+                        case "C":
+                            point[i] = 20;
+                            break;
+                        case "C0":
+                            point[i] = 20;
+                            break;
+                        case "D+":
+                            point[i] = 15;
+                            break;
+                        case "D":
+                            point[i] = 10;
+                            break;
+                        case "D0":
+                            point[i] = 10;
+                            break;
+                        case "F":
+                            point[i] = 0;
+                            break;
+                        case "F0":
+                            point[i] = 0;
+                            break;
+                    }
+                }
+
+                for(var i = 0; i < count.length; i++){
+                    if(count[i].value=="" | count[i].value==" " | count[i].value==null){
+                        continue;
+                    } else {
+                        point[i] = eval(point[i]+"/10");
+                        if(major[i].checked == true){
+                            majorFlag = true;
+                            majorResult = eval(majorResult+"+"+count[i].value+"*"+point[i]);
+                            temp2 = eval(temp2+"+"+count[i].value);
+                        }
+                        result = eval(result+"+"+count[i].value+"*"+point[i]);
+                        temp = eval(temp+"+"+count[i].value);
+                    }
+                }
+                result = eval(result+"/"+temp);
+                var output = document.getElementById("result");
+                output.innerHTML = parseFloat(result).toFixed(2);
+
+                //전공이 체크되었을떄만 전공평점을 바꾼다.
+                if(majorFlag == true){
+                    majorResult = eval(majorResult+"/"+temp2);
+                    var output2 = document.getElementById("majorResult");
+                    output2.innerHTML = parseFloat(majorResult).toFixed(2);
+                }
+            }
+            //강의명, 학점, 성적이 제대로 입력되었는지 확인함
+            function firstCheck() {
+                var right = true;
+                var subject = document.getElementsByName("subject");
+                var count = document.getElementsByName("count");
+                var grade = document.getElementsByName("grade");
+
+                for(var i = 0; i < subject.length; i++){
+                    right = true;
+                    
+                    if(subject[i].value == "" | subject[i].value == " "){
+                        if((count[i].value != "" & count[i].value != " ") | gradeCheck(grade[i].value)==true){
+                            //강의명은 입력안되더라도 학점과 성적 둘 중 하나가 입력되었을 때
+                            if((count[i].value != "" & count[i].value != " ") & gradeCheck(grade[i].value)==true){
+                                continue;
+                            }
+                            else {
+                                //학점과 성적이 모두 입력되었는지 확인
+                                alert("학점과 성적은 반드시 짝을 맞춰서 입력해주세요");
+                                right = false;
+                                break;
+                            }
+                        }
+                    }
+                    else{ //강의명이 입력되었을때, 학점과 성적이 입력되는 지
+                        if((count[i].value == "" & count[i].value == " ") | gradeCheck(grade[i].value)==false){
+                            alert("강의명을 입력한 줄에 학점과 성적을 제대로 입력해주세요");
+                            right = false;
+                            break;
+                        }
+                        else {
+                            if((count[i].value != "" & count[i].value != " ") & gradeCheck(grade[i].value)==true){
+                                continue;
+                            }
+                            else {
+                                //학점과 성적이 모두 입력되었는지 확인
+                                alert("강의명을 입력한 줄에 학점과 성적을 제대로 입력해주세요");
+                                right = false;
+                                break;
+                            }
+                        }
+                    }
+                }
+                //for문이 정상적으로 돌아서 아무 이상이 없어야 doCalc함수를 실행함
+                if(right == true){
+                    doCalc();
+                }
+            }
+            //성적이 제대로 입력되었는지 체크하는 함수
+            function gradeCheck(temp) {
+                switch(temp.toUpperCase())
+                {
+                    case "A+":
+                        return true;
+                    case "A":
+                        return true;
+                    case "A0":
+                        return true;
+                    case "B+":
+                        return true;
+                    case "B":
+                        return true;
+                    case "B0":
+                        return true;
+                    case "C+":
+                        return true;
+                    case "C":
+                        return true;
+                    case "C0":
+                        return true;
+                    case "D+":
+                        return true;
+                    case "D":
+                        return true;
+                    case "D0":
+                        return true;
+                    case "F":
+                        return true;
+                    case "F0":
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+        </script>
+        <style>
+            header {
+                text-shadow : 3px 3px skyblue;
+            }
+            header::first-letter{
+                color : #FA8072;
+            }
+            body {
+                background-color : #FAEBD7;
+                width : 470px;
+                margin-left : auto;
+                margin-right : auto;
+            }
+            main label {
+                font-weight: bolder;
+            }
+            section button {
+                background-color: #CCE5FF;
+                font-size : 20px;
+                cursor : pointer;
+                margin-bottom : 10px;
+            }
+            footer span {
+                color : red;
+            }
+            .subject {
+                width : 180px;
+            }
+            .count {
+                width : 30px;
+                text-align : center;
+            }
+            .grade {
+                width : 30px;
+                text-align : center;
+            }
+            #result, #majorResult{
+                font-size : 25px;
+                color : red;
+            }
+            h3, h1{
+                cursor : default;
+            }
+            .major {
+                cursor : pointer;
+            }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1>학점계산기</h1>
+        </header>
+        <hr>
+
+        <main>
+            <form id="Calclist">
+                <label for="subject">강의명</label>
+                <input type="text" name="subject" class="subject">
+                <label for="count">학점</label>
+                <input type="text" name="count" class="count">
+                <label for="grade">성적</label>
+                <input type="text" name="grade" class="grade">
+                <label for="check">전공</label>
+                <input type="checkbox" name="major" class="major"></check>
+                <br>
+                <label for="subject">강의명</label>
+                <input type="text" name="subject" class="subject">
+                <label for="count">학점</label>
+                <input type="text" name="count" class="count">
+                <label for="grade">성적</label>
+                <input type="text" name="grade" class="grade">
+                <label for="check">전공</label>
+                <input type="checkbox" name="major" class="major"></check>
+                <br>
+                <label for="subject">강의명</label>
+                <input type="text" name="subject" class="subject">
+                <label for="count">학점</label>
+                <input type="text" name="count" class="count">
+                <label for="grade">성적</label>
+                <input type="text" name="grade" class="grade">
+                <label for="check">전공</label>
+                <input type="checkbox" name="major" class="major"></check>
+                <br>
+                <label for="subject">강의명</label>
+                <input type="text" name="subject" class="subject">
+                <label for="count">학점</label>
+                <input type="text" name="count" class="count">
+                <label for="grade">성적</label>
+                <input type="text" name="grade" class="grade">
+                <label for="check">전공</label>
+                <input type="checkbox" name="major" class="major"></check>
+                <br>
+                <label for="subject">강의명</label>
+                <input type="text" name="subject" class="subject">
+                <label for="count">학점</label>
+                <input type="text" name="count" class="count">
+                <label for="grade">성적</label>
+                <input type="text" name="grade" class="grade">
+                <label for="check">전공</label>
+                <input type="checkbox" name="major" class="major"></check>
+                <br>
+                <label for="subject">강의명</label>
+                <input type="text" name="subject" class="subject">
+                <label for="count">학점</label>
+                <input type="text" name="count" class="count">
+                <label for="grade">성적</label>
+                <input type="text" name="grade" class="grade">
+                <label for="check">전공</label>
+                <input type="checkbox" name="major" class="major"></check>
+                <br>
+                <label for="subject">강의명</label>
+                <input type="text" name="subject" class="subject">
+                <label for="count">학점</label>
+                <input type="text" name="count" class="count">
+                <label for="grade">성적</label>
+                <input type="text" name="grade" class="grade">
+                <label for="check">전공</label>
+                <input type="checkbox" name="major" class="major"></check>
+                <br>
+                <label for="subject">강의명</label>
+                <input type="text" name="subject" class="subject">
+                <label for="count">학점</label>
+                <input type="text" name="count" class="count">
+                <label for="grade">성적</label>
+                <input type="text" name="grade" class="grade">
+                <label for="check">전공</label>
+                <input type="checkbox" name="major" class="major"></check>
+                <br>
+                <label for="subject">강의명</label>
+                <input type="text" name="subject" class="subject">
+                <label for="count">학점</label>
+                <input type="text" name="count" class="count">
+                <label for="grade">성적</label>
+                <input type="text" name="grade" class="grade">
+                <label for="check">전공</label>
+                <input type="checkbox" name="major" class="major"></check>
+                <br>
+                <label for="subject">강의명</label>
+                <input type="text" name="subject" class="subject">
+                <label for="count">학점</label>
+                <input type="text" name="count" class="count">
+                <label for="grade">성적</label>
+                <input type="text" name="grade" class="grade">
+                <label for="check">전공</label>
+                <input type="checkbox" name="major" class="major"></check>
+                <br>
+            </form>
+
+            <section>
+                <hr>
+                <label>평점 : </label><label id="result">0</label>
+                <br>
+                <label>전공평점 : </label><label id="majorResult">0</label>
+                <br>
+                <br>
+                <button type="button" onClick="firstCheck()">계산</button>
+                <button type="button" onClick="addInput()">칸 추가</button>
+                <button type="button" onClick="start()">시간표불러오기</button>
+                <button type="button" onClick="Exit()">종료하기</button>
+            </section>
+        </main>
+
+        <footer>
+            <hr>
+            <h3>학점 칸에는 반드시 <span>숫자</span>만 적어주세요(ex. 2)</h3>
+            <h3>성적은 <span>4.5점</span>을 만점기준으로 하고 있습니다.</h3>
+            <h3>- 성적 : A+ ~ F, 패스(P), 언패스(U)</h3>
+            <h3>칸이 부족하면 <span>칸추가하기</span> 버튼을 눌러주세요</h3>
+            <h3>평점은 소수점2자리까지 표시됩니다.</h3>
+        </footer>
+    </body>
+</html>

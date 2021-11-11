@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>웹수업체크</title>
+        <style>
+            header {
+                text-align : center;
+                font-size : 20px;
+                text-shadow: 3px 3px skyblue;
+            }
+            header::first-letter {
+                color : #FA8072;
+            }
+            table {
+                width : 580px;
+                border : 2px solid;
+                table-layout: fixed;
+                margin-left : auto;
+                margin-right : auto;
+            }
+            thead {
+                background-Color : pink;
+            }
+            table th, table td {
+                border : 1px solid black;
+            }
+            thead th{
+                width : 100px;
+            }
+            tbody th{
+                width : 15px;
+                height : 70px;
+                background-color : skyblue;
+            }
+            footer input {
+                margin-bottom : 10px;
+            }
+            footer button {
+                width : 100px;
+                height : 30px;
+                font-size : 18px;
+                font-weight : bold;
+                cursor : pointer;
+            }
+            #startTime, #time {
+                width : 120px;
+            }
+            #subject{
+                margin-right : 20px;
+            }
+            #startTime{
+                margin-right : 10px;
+            }
+            #insert{
+                background-color : #00FA9A;
+            }
+            #delete {
+                background-color : #FF6347;
+                width : 120px;
+            }
+            #calc {
+                background-color : #DDA0DD;
+                width : 120px;
+            }
+            hr {
+                border : 1px solid #FA8072;
+            }
+            body {
+                background-color : #F9F3E9;
+                width : 800px;
+                margin-left : auto;
+                margin-right : auto;
+            }
+            .class1, .class7{
+                background-color: #FA8072;
+                color : white;
+                font-size : 17px;
+                cursor : default;
+                font-weight: bold;
+            }
+            .class2, .class8{
+                background-color : #FFA500;
+                color : white;
+                font-size : 17px;
+                cursor : default;
+                font-weight: bold;
+            }
+            .class3, .class9{
+                background-color : #41A0E1;
+                color : white;
+                font-size : 17px;
+                cursor : default;
+                font-weight: bold;
+            }
+            .class3, .class12{
+                background-color : #FFD700;
+                color : white;
+                font-size : 17px;
+                cursor : default;
+                font-weight: bold;
+            }
+            .class3, .class10{
+                background-color : #c51f8e;
+                color : white;
+                font-size : 17px;
+                cursor : default;
+                font-weight: bold;
+            }
+            .class4, .class11{
+                background-color : #bfe28b;
+                color : black;
+                font-size : 17px;
+                cursor : default;
+                font-weight: bold;
+            }
+            .class5, .class13{
+                background-color : #DDA0DD;
+                color : white;
+                font-size : 17px;
+                cursor : default;
+                font-weight: bold;
+            }
+            .class6, .class14{
+                background-color : #486d48;
+                color : white;
+                font-size : 17px;
+                cursor : default;
+                font-weight: bold;
+            }
+            .class7, .class15{
+                background-color : #FFE4C4;
+                color : black;
+                font-size : 17px;
+                cursor : default;
+                font-weight: bold;
+            }
+            .radio {
+                cursor : pointer;
+            }
+            h1, h3 {
+                cursor : default;
+            }
+            h3 {
+                margin-top : 5px;
+                margin-bottom : 5px;
+            }
+            span {
+                color : red;
+            }
+            th {
+                cursor : default;
+            }
+        </style>
+        <script>
+            window.onload = start;
+            var Sublist = new Array();
+            var classNum="1";
+            //시작함수, window.onload를 하면서 저장된 값을 불러온다.
+            function start() {
+                var value = localStorage.getItem('localSublist');
+                if(value!=null){
+                    var storedStorage = JSON.parse(value);
+                    for(var i = 0; i < storedStorage.length; i++){
+                        var temp1 = storedStorage[i].indexOf("|");
+                        var temp2 = storedStorage[i].indexOf("&");
+                        var temp3 = storedStorage[i].indexOf("^");
+
+                        var subject = storedStorage[i].substring(0, temp1);
+                        var startTime = storedStorage[i].substring(temp1+1, temp2);
+                        var time = storedStorage[i].substring(temp2+1, temp3);
+                        var selectDayTemp = storedStorage[i].substring(temp3+1);
+                        var selectDay;
+                        switch(selectDayTemp){
+                            case '0':
+                                selectDay = "mon";
+                                break;
+                            case '1':
+                                selectDay = "tue";
+                                break;
+                            case '2':
+                                selectDay = "wed";
+                                break;
+                            case '3':
+                                selectDay = "thu";
+                                break;
+                            case '4':
+                                selectDay = "fri";
+                                break;
+                            default:
+                                break;
+                        }
+                        var target = document.getElementById(selectDay+startTime);
+                        target.innerHTML = subject;
+                        target.setAttribute("class", "class"+classNum);
+                        target.setAttribute("ondblclick", "deleteSub(this)");
+                        target.style = "cursor : pointer";
+                        var tempNum = startTime;
+                        for(var k = 1; k < time; k++){
+                            tempNum = eval(startTime + "+" + k);
+                            if(tempNum > 12){
+                                tempNum -= 12;
+                            }
+                            var temp = document.getElementById(selectDay+tempNum);
+                            temp.setAttribute("class", "class"+classNum);
+                        }
+                        classNum=eval(classNum+"+"+1);
+                        Sublist.push(subject+"|"+startTime+"&"+time+"^"+selectDayTemp);
+                    }
+                }
+            }
+            //라디오 버튼인 요일이 뭐가 체크되었는지 확인하는 것
+            function findChecked() {
+                var found = null;
+                var date = document.getElementsByName("date");
+                for (var i = 0; i < date.length; i++){
+                    if(date[i].checked == true){
+                        found = date[i];
+                    }
+                }
+                if(found != null){
+                    return found.value;
+                }
+                else{
+                    alert("요일을 선택하지 않았습니다.");
+                    return false;
+                }
+            }
+            //라디오 버튼인 요일 버튼 초기화 함수
+            function resetChecked() {
+                var found = document.getElementsByName("date");
+                for(var i = 0; i < found.length; i++){
+                    if(found[i].checked){
+                        found[i].checked = false;
+                    }
+                }
+            }
+            //강의 등록하기 함수
+            function insertSub(){
+                //강의명 읽고, 강의시작시간, 강의시간, 라디오버튼 읽어서 표에 넣기
+                var subject = document.getElementById("subject").value;
+                var startTime = document.getElementById("startTime").value;
+                var time = document.getElementById("time").value;
+                var calcTime = eval(startTime+"+"+time)-1;
+                var selectDay;
+                var selectDayTemp;
+
+                //넣을 요일 찾기
+                switch(findChecked()){
+                    case 'mon':
+                        selectDay = "mon";
+                        selectDayTemp = 0;
+                        break;
+                    case 'tue':
+                        selectDay = "tue";
+                        selectDayTemp = 1;
+                        break;
+                    case 'wed':
+                        selectDay = "wed";
+                        selectDayTemp = 2;
+                        break;
+                    case 'thu':
+                        selectDay = "thu";
+                        selectDayTemp = 3;
+                        break;
+                    case 'fri':
+                        selectDay = "fri";
+                        selectDayTemp = 4;
+                        break;
+                    default:
+                        return false;
+                }
+
+                var target = document.getElementById(selectDay+startTime);
+                if(!(target.classList.contains("non"))){
+                    alert("시간표가 겹칩니다.");
+                    return false;
+                }
+                for(var i = 1; i < time; i++){
+                    tempNum = eval(startTime + "+" + i);
+                    if(tempNum > 12){
+                        tempNum -= 12;
+                    }
+                    var temp = document.getElementById(selectDay+tempNum);
+                    if(!(temp.classList.contains("non"))){
+                        alert("시간표가 겹칩니다.");
+                        return false;
+                    }
+                }
+                
+                target.innerHTML = subject;
+                target.setAttribute("class", "class"+classNum);
+                target.setAttribute("ondblclick", "deleteSub(this)");
+                target.style = "cursor : pointer";
+                var tempNum = startTime;
+                for(var i = 1; i < time; i++){
+                    tempNum = eval(startTime + "+" + i);
+                    if(tempNum > 12){
+                        tempNum -= 12;
+                    }
+                    var temp = document.getElementById(selectDay+tempNum);
+                    temp.setAttribute("class", "class"+classNum);
+                }
+                classNum=eval(classNum+"+"+1);
+
+                //Sublist에 강의정보 넣기(강의이름 | 시작시간 & 강의시간 / 강의요일)
+                Sublist.push(subject+"|"+startTime+"&"+time+"^"+selectDayTemp);
+                localStorage.setItem("localSublist", JSON.stringify(Sublist));
+
+                //입력칸들 초기화
+                resetInput();
+                resetChecked();
+            }
+            //강의 삭제하기 함수
+            function deleteSub(e) {
+                var ret = confirm(e.innerHTML+"강의를 삭제하시겠습니까?");
+                if(ret){
+                    var value = localStorage.getItem('localSublist');
+                    if(value!=null){
+                        var storedStorage = JSON.parse(value);
+                        for(var i = 0; i < storedStorage.length; i++){
+                            var temp1 = storedStorage[i].indexOf("|");
+                            var temp2 = storedStorage[i].indexOf("&");
+                            var temp3 = storedStorage[i].indexOf("^");
+                            var subject = storedStorage[i].substring(0, temp1);
+                            var startTime = storedStorage[i].substring(temp1+1, temp2);
+                            var time = storedStorage[i].substring(temp2+1, temp3);
+                            var selectDayTemp = storedStorage[i].substring(temp3+1);
+                            var selectDay;
+                                switch(selectDayTemp){
+                                    case '0':
+                                        selectDay = "mon";
+                                        break;
+                                    case '1':
+                                        selectDay = "tue";
+                                        break;
+                                    case '2':
+                                        selectDay = "wed";
+                                        break;
+                                    case '3':
+                                        selectDay = "thu";
+                                        break;
+                                    case '4':
+                                        selectDay = "fri";
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            if(subject == e.innerHTML & (e.id.substring(0, 3) == selectDay) &
+                                    (e.id.substring(3) == startTime)){
+                                var tempNum = startTime;
+                                for(var k = 1; k < time; k++){
+                                    tempNum = eval(startTime + "+" + k);
+                                    if(tempNum > 12){
+                                        tempNum -= 12;
+                                    }
+                                    var target = document.getElementById(selectDay+tempNum);
+                                    target.setAttribute("class", "non");
+                                }
+                                storedStorage.splice(i, 1);
+                                Sublist.splice(i, 1);
+                                localStorage.setItem("localSublist", JSON.stringify(storedStorage));
+                            }
+                        }
+                    }
+                    e.innerHTML = "";
+                    e.setAttribute("class", "non");
+                    e.setAttribute("ondblclick", "");
+                }
+            }
+            //강의시간표 초기화
+            function timetableReset() {
+                var ret = confirm("정말 강의시간표를 초기화 하시겠습니까?");
+                if(ret){
+                    var value = localStorage.getItem('localSublist');
+                    if(value!=null){
+                        var storedStorage = JSON.parse(value);
+                        for(var i = 0; i < storedStorage.length; i++){
+                            var temp1 = storedStorage[i].indexOf("|");
+                            var temp2 = storedStorage[i].indexOf("&");
+                            var temp3 = storedStorage[i].indexOf("^");
+                            var subject = storedStorage[i].substring(0, temp1);
+                            var startTime = storedStorage[i].substring(temp1+1, temp2);
+                            var time = storedStorage[i].substring(temp2+1, temp3);
+                            var selectDayTemp = storedStorage[i].substring(temp3+1);
+                            var selectDay;
+                                switch(selectDayTemp){
+                                    case '0':
+                                        selectDay = "mon";
+                                        break;
+                                    case '1':
+                                        selectDay = "tue";
+                                        break;
+                                    case '2':
+                                        selectDay = "wed";
+                                        break;
+                                    case '3':
+                                        selectDay = "thu";
+                                        break;
+                                    case '4':
+                                        selectDay = "fri";
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            var tempNum = startTime;
+                            for(var k = 0; k < time; k++){
+                                tempNum = eval(startTime + "+" + k);
+                                if(tempNum > 12){
+                                    tempNum -= 12;
+                                }
+                                var target = document.getElementById(selectDay+tempNum);
+                                target.setAttribute("class", "non");
+                                target.innerHTML="";
+                            }
+                        }
+                        storedStorage = "";
+                        Sublist = new Array();
+                        localStorage.setItem("localSublist", JSON.stringify(storedStorage));
+                    }
+                }
+            }
+            //첫번째 체크, 강의명칸 체크함
+            function firstCheck() {
+                var subject = document.getElementById("subject");
+                if((subject.value!="" & subject.value!=" ") & isNaN(subject.value)==true){
+                    secondCheck();
+                }
+                else{
+                    alert("강의명을 입력해주세요");
+                    subject.focus();
+                }
+            }
+            //두번째 체크, 강의시작시간칸 체크함
+            function secondCheck() {
+                var startTime = document.getElementById("startTime");
+                if((startTime.value >= 9 & startTime.value <= 12) | (startTime.value >= 1 & startTime.value <= 5)){
+                    thirdCheck();
+                }
+                else{
+                    alert("강의시작시간을 제대로 입력해주세요");
+                    startTime.focus();
+                }
+            }
+            //세번쨰 체크, 강의시간칸 체크함
+            function thirdCheck() {
+                var time = document.getElementById("time");
+                var startTime = document.getElementById("startTime");
+
+                if((time.value >= 1 & time.value <= 9) & isNaN(time.value)==false){
+                    if((startTime.value == 5 & time.value >= 2) | (startTime.value == 4 & time.value >= 3)){
+                        alert("강의시간을 제대로 입력해주세요");
+                        time.focus();
+                    }
+                    else{
+                        insertSub();
+                    }
+                }
+                else{
+                    alert("강의시간을 제대로 입력해주세요");
+                    time.focus();
+                }
+            }
+            //입력칸들 초기화 함수
+            function resetInput() {
+                var subject = document.getElementById("subject");
+                var startTime = document.getElementById("startTime");
+                var time = document.getElementById("time");
+
+                subject.value = "";
+                startTime.value = "";
+                time.value = "";
+            }
+            //학점계산기 열기
+            function openCalc() {
+                window.open("calc.html", "_blank", "left=300, top=100, width=500, height=700");
+            }
+        </script>
+    </head>
+    <body>
+        <header>
+            <h1>웹수업체크</h1>
+            <hr>
+        </header>
+        <main>
+            <table>
+                <thead>
+                    <tr>
+                        <td></td><th>월</th><th>화</th><th>수</th><th>목</th><th>금</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr valign="top" id="9">
+                        <th>9</th>
+                        <td id="mon9" class="non"></td>
+                        <td id="tue9" class="non"></td>
+                        <td id="wed9" class="non"></td>
+                        <td id="thu9" class="non"></td>
+                        <td id="fri9" class="non"></td>
+                    </tr>
+                    <tr valign="top" id="10">
+                        <th>10</th>
+                        <td id="mon10" class="non"></td>
+                        <td id="tue10" class="non"></td>
+                        <td id="wed10" class="non"></td>
+                        <td id="thu10" class="non"></td>
+                        <td id="fri10" class="non"></td>
+                    </tr>
+                    <tr valign="top" id="11">
+                        <th>11</th>
+                        <td id="mon11" class="non"></td>
+                        <td id="tue11" class="non"></td>
+                        <td id="wed11" class="non"></td>
+                        <td id="thu11" class="non"></td>
+                        <td id="fri11" class="non"></td>
+                    </tr>
+                    <tr valign="top" id="12">
+                        <th>12</th>
+                        <td id="mon12" class="non"></td>
+                        <td id="tue12" class="non"></td>
+                        <td id="wed12" class="non"></td>
+                        <td id="thu12" class="non"></td>
+                        <td id="fri12" class="non"></td>
+                    </tr>
+                    <tr valign="top" id="1">
+                        <th>1</th>
+                        <td id="mon1" class="non"></td>
+                        <td id="tue1" class="non"></td>
+                        <td id="wed1" class="non"></td>
+                        <td id="thu1" class="non"></td>
+                        <td id="fri1" class="non"></td>
+                    </tr>
+                    <tr valign="top" id="2">
+                        <th>2</th>
+                        <td id="mon2" class="non"></td>
+                        <td id="tue2" class="non"></td>
+                        <td id="wed2" class="non"></td>
+                        <td id="thu2" class="non"></td>
+                        <td id="fri2" class="non"></td>
+                    </tr>
+                    <tr valign="top" id="3">
+                        <th>3</th>
+                        <td id="mon3" class="non"></td>
+                        <td id="tue3" class="non"></td>
+                        <td id="wed3" class="non"></td>
+                        <td id="thu3" class="non"></td>
+                        <td id="fri3" class="non"></td>
+                    </tr>
+                    <tr valign="top" id="4">
+                        <th>4</th>
+                        <td id="mon4" class="non"></td>
+                        <td id="tue4" class="non"></td>
+                        <td id="wed4" class="non"></td>
+                        <td id="thu4" class="non"></td>
+                        <td id="fri4" class="non"></td>
+                    </tr>
+                    <tr valign="top" id="5">
+                        <th>5</th>
+                        <td id="mon5" class="non"></td>
+                        <td id="tue5" class="non"></td>
+                        <td id="wed5" class="non"></td>
+                        <td id="thu5" class="non"></td>
+                        <td id="fri5" class="non"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </main>
+        <footer>
+                <h3><span>삭제</span>하고 싶은 강의는 강의명을 <span>더블클릭</span>해주세요</h3>
+                <form>
+                    <label for="subject">강의명:</lebel>
+                    <input type="text" id="subject">
+                    <label for="startTime">강의시작시간:</label>
+                    <input type="text" id="startTime" placeholder='9시 시작이면 "9"'>
+                    <label for="time">강의시간:</label>
+                    <input type="text" id="time" placeholder='3시간이면 "3"'>
+                    <br>
+                    <input type="radio" value="mon" name="date" class="radio">월요일
+                    <input type="radio" value="tue" name="date" class="radio">화요일
+                    <input type="radio" value="wed" name="date" class="radio">수요일
+                    <input type="radio" value="thu" name="date" class="radio">목요일
+                    <input type="radio" value="fri" name="date" class="radio">금요일
+                    <button type="button" id="insert" onClick="firstCheck()" title="강의등록하기">강의등록</button>
+                    <button type="button" id="delete" onClick="timetableReset()" title="시간표초기화">강의초기화</button>
+                    <button type="button" id="calc" onClick="openCalc()" title="학점계산기열기">학점계산기</button>
+                </form>
+        </footer>
+    </body>
+</html>
